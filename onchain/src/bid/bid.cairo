@@ -24,13 +24,21 @@ pub mod Bid {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        SubmitNFTForBid: SubmitNFTForBid
+        SubmitNFTForBid: SubmitNFTForBid,
+        BidPlaceOnNFTTBA: BidPlaceOnNFTTBA
     }
 
     #[derive(Drop, starknet::Event)]
     struct SubmitNFTForBid {
         pub bid_id: u128,
         pub nft_address: felt252,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct BidPlaceOnNFTTBA {
+        pub bid_id: u128,
+        pub buyer_address: felt252,
+        pub amount: u64,
     }
 
     // maybe we need a constructor 
@@ -43,12 +51,12 @@ pub mod Bid {
 
     #[abi(embed_v0)]
     impl Bidsimpl of IBids<ContractState> {
-        fn submit_nft_for_bid(ref self: TContractState, nft: felt252) {
+        fn submit_nft_for_bid(ref self: TContractState, nft_address: felt252) {
             // use pragma to generate random number for bidId
 
             let bid_id = self.bid_id_num.read() + 1;
             self.seller_nft.write(get_caller_address(), nft);
-            self.tba_bids.write(nft, bid_id);
+            self.tba_bids.write(nft_address, bid_id);
             // update the bidId
             self.bid_id_num.write(self.bid_id_num.read + 1);
 
@@ -57,6 +65,22 @@ pub mod Bid {
             let event_nft_address = self.seller_nft.read(get_caller_address());
             // dispatch an event that carry the BID_ID and nft address 
             self.emit(SubmitNFTForBid { bid_id: event_bid_id, nft_address: event_nft_address });
+        }
+
+        fn submit_bid(ref self: TContractState, nft_address: felt252, amount: u64,) {
+            let bid_id = self.tba_bids.read(nft_address);
+            assert(!bid_id, 'No Bid Place for this nft');
+            // i don't know how expensive this operation is -> self.tba_bids.read(nft_address)
+            self.place_bids.write(self.tba_bids.read(nft_address), (get_caller_address(), amount));
+            // dispatch bid place event 
+            self
+                .emit(
+                    BidPlaceOnNFTTBA {
+                        bid_id: self.tba_bids.read(nft_address),
+                        buyer_address: get_caller_address(),
+                        amount: amount
+                    }
+                );
         }
     }
 }
