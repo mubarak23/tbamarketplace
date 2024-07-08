@@ -24,11 +24,11 @@ pub mod Bid {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        SubmittedNFTForBid: SubmittedNFTForBid
+        SubmitNFTForBid: SubmitNFTForBid
     }
 
     #[derive(Drop, starknet::Event)]
-    struct SubmittedNFTForBid {
+    struct SubmitNFTForBid {
         pub bid_id: u128,
         pub nft_address: felt252,
     }
@@ -56,7 +56,7 @@ pub mod Bid {
 
             let event_nft_address = self.seller_nft.read(get_caller_address());
             // dispatch an event that carry the BID_ID and nft address 
-            self.emit(SubmittedNFTForBid { bid_id: event_bid_id, nft_address: event_nft_address });
+            self.emit(SubmitNFTForBid { bid_id: event_bid_id, nft_address: event_nft_address });
         }
     }
 }
