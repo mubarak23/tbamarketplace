@@ -1,52 +1,87 @@
 "use client";
-import WalletBar from "@/components/WalletBar";
+import NFTCard from "@/components/Card";
+import Layout from "@/components/Layout";
+import Navbar from "@/components/Navbar";
+import {useRouter} from "next/navigation"
 
 export default function Home() {
-  return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-12">
-      <WalletBar />
-      <p className="mb-2 text-lg">
-        Get started by editing&nbsp;
-        <code className="p-2 bg-gray-600 rounded">pages/index.tsx</code>
-      </p>
-      <div className="flex flex-row gap-12">
-        <a
-          className="p-4 rounded-md w-48 bg-black border flex flex-col items-center justify-center gap-6 group"
-          href="https://starknet.io/docs"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <img
-            src="https://pbs.twimg.com/profile_images/1656626805816565763/WyFDMG6u_400x400.png"
-            className="object-contain w-24 h-24"
-            alt="starknet-icon"
-          />
-          <p className="mb-2 text-lg text-center">
-            Starknet Documentation
-            <span className=" group-hover:font-bold transition-all ml-2 group-hover:ml-4">
-              {">"}
-            </span>
-          </p>
-        </a>
-        <a
-          className="p-4 rounded-md w-48 bg-black border flex flex-col items-center justify-center gap-6 group"
-          href="https://starknet-react.com/docs/getting-started"
-          target="_blank"
-          rel="norefferer"
-        >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1150px-React-icon.svg.png"
-            className="object-contain w-24 h-24"
-            alt="react-icon"
-          />
-          <p className="mb-2 text-lg text-center">
-            Starknet React Documentation
-            <span className="group-hover:font-bold transition-all ml-2 group-hover:ml-4">
-              {">"}
-            </span>
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+  const navigate = useRouter()
+	return (
+		<Layout>
+			
+			<div className="bg-hero bg-no-repeat bg-cover my-10 rounded-xl border border-[#DCD4FF] lg:h-[592px] w-full  flex items-center gap-40 justify-between px-[120px]">
+				<div className="flex flex-col  justify-between">
+					<h1 className="text-[112px] font-satoshi text-primaryText leading-[134px]">
+						Bid&Sell
+					</h1>
+					<p className="font-satoshi font-500  text-secondaryText py-10">
+						Bid for and Sell your NFTs as Token Band Accounts.
+					</p>
+					<div className="flex gap-5">
+						<button   className="px-5 py-3 text-white bg-primary border border-primary rounded-lg">
+							Explore
+						</button>
+						<button onClick={() => navigate.push('/create')} className="px-5 py-3 text-primary bg-transparent border border-primary rounded-lg">
+							Submit
+						</button>
+					</div>
+				</div>
+				<div className="flex-1">
+					<img
+						src="/hero-img.png"
+						className="w-full  rounded-lg"
+						alt="hero-img"
+					/>
+				</div>
+			</div>
+
+			<section>
+				<h1 className="font-bold text-[32px] text-[#192648]">
+					Latest Addition
+				</h1>
+				<div className="py-10">
+					<div className="grid grid-cols-4 gap-5">
+						{Array(8)
+							.fill(0)
+							.map((_, i) => (
+								<div key={i}>
+									<NFTCard route="/details" />
+								</div>
+							))}
+					</div>
+				</div>
+				<button onClick={() => navigate.push('/marketplace') } className="w-full border border-primary bg-transparent text-primary rounded-lg py-2">
+					View All NFTs
+				</button>
+			</section>
+			<section className="bg-hero bg-no-repeat bg-cover my-10 rounded-xl border border-[#DCD4FF] lg:h-[492px] w-full  flex items-center gap-40 justify-between px-[120px]">
+				<div>
+					<h1 className="bg-gradient-to-r from-[#7873F5] via-purple-500 to-[#EC77AB] bg-clip-text text-transparent font-satoshi text-[56px] font-bold leading-[67px]">
+						Provide Access to NFTs as Token Band Accounts
+					</h1>
+					<p className="py-5 text-primaryText font-satoshi ">
+						Powered by <span className="underline text-primary">Starknet</span>
+					</p>
+					<button className="px-5 py-3 text-white bg-primary border border-primary rounded-lg">
+						Submit
+					</button>
+				</div>
+			</section>
+
+			<section className="flex flex-col items-center justify-between py-10">
+				<h1 className="text-[112px] font-satoshi text-primaryText leading-[134px]">
+					Bid&Sell
+				</h1>
+
+				<div className="flex py-5 gap-5">
+					<button  className="px-5 py-3 text-white bg-primary border border-primary rounded-lg">
+						Explore
+					</button>
+					<button onClick={() => navigate.push('/nft')} className="px-5 py-3 text-primary bg-transparent border border-primary rounded-lg">
+						Submit
+					</button>
+				</div>
+			</section>
+		</Layout>
+	);
 }
