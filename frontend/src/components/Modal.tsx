@@ -32,10 +32,10 @@ const CustomModal: FC<CustomModalProps> = ({
 				<div className="flex min-h-full items-end justify-center p-4  sm:items-center sm:p-0">
 					<DialogPanel
 						transition
-						className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4  text-left shadow-xl transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
+						className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4  text-left shadow-xl transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-md sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
 					>
 						<div>
-							<div className="flex items-center w-full  gap-20 justify-end border-b pb-1">
+							<div className="flex items-center w-full  gap-20 justify-between border-b pb-1">
 							<DialogTitle
 									as="h3"
 									className="text-[20px] text-center font-bold text-primaryText"

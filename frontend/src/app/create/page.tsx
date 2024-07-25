@@ -1,3 +1,4 @@
+"use client"
 import { StarknetLogo, UploadIcon } from "@/assets/Icons";
 import { Input } from "@/components/Input";
 import Layout from "@/components/Layout";
