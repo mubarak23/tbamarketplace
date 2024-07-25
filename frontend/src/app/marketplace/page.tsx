@@ -19,9 +19,13 @@ import {
 } from "@heroicons/react/16/solid";
 import Layout from "@/components/Layout";
 import NFTCard from "@/components/Card";
+import useListingHook from "@/components/hooks/useListing";
+import OrbitProgress from "react-loading-indicators/OrbitProgress";
 
 const MarketPlace = () => {
+
 	const [mobileFiltersOpen, setMobileFiltersOpen] = useState<boolean>(false);
+	const { listings, isLoading } = useListingHook();
 
 	return (
 		<Layout>
@@ -200,13 +204,29 @@ const MarketPlace = () => {
 							</aside>
 
 							<div className="mt-6 lg:col-span-2 lg:mt-0 xl:col-span-3">
-								<div className="grid grid-cols-3 gap-10">
-									{Array(8)
-										.fill(0)
-										.map(() => (
-											<NFTCard route="/details"  />
-										))}
-								</div>
+								{isLoading ? (
+									<div className="h-[50vh] flex items-center justify-center">
+										<OrbitProgress
+										color="#4A23A4"
+										size="medium"
+										text=""
+										textColor=""
+									/>
+									</div>
+								) : (
+									<div className="grid grid-cols-3 gap-10 ">
+										{listings?.map(
+											(
+												{ nft_contract_address, seller, token_id, amount, listing_id },
+												i
+											) => (
+												<div key={i}>
+													<NFTCard lisiting_id={listing_id} title={nft_contract_address} seller={seller} route="/details" amount={amount} />
+												</div>
+											)
+										)}
+									</div>
+								)}
 							</div>
 						</div>
 					</main>

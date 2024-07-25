@@ -1,15 +1,70 @@
 "use client";
 import { PlaceBidWhiteIcon } from "@/assets/Icons";
 import NFTCard from "@/components/Card";
+import useListingHook from "@/components/hooks/useListing";
 import { Input } from "@/components/Input";
 import Layout from "@/components/Layout";
 import CustomModal from "@/components/Modal";
+import { ABI } from "@/lib/abi";
+import { CONTRACT_ADDR } from "@/lib/utils";
+import {
+	useAccount,
+	useContractRead,
+	useContractWrite,
+} from "@starknet-react/core";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import { cairo, Contract, provider, RpcProvider, Uint256 } from "starknet";
 
 export default function Home() {
 	const [openListing, setOpenListing] = useState<boolean>(false);
+	const [tba, setTba] = useState<string>("");
+	const [amount, setAmount] = useState<number>(0);
+
+	const { listings } = useListingHook();
+
+	const provider = new RpcProvider({
+		nodeUrl: "https://starknet-sepolia.public.blastapi.io",
+	});
+	const { isConnected, address } = useAccount();
 	const navigate = useRouter();
+
+	const calls = useMemo(() => {
+		let formattedAmount: Uint256 = cairo.uint256(amount);
+
+		const tx = {
+			contractAddress: CONTRACT_ADDR,
+			entrypoint: "list_tba",
+			provider: provider,
+			calldata: [tba, formattedAmount],
+		};
+		return [tx];
+	}, [tba, amount]);
+
+	const { writeAsync } = useContractWrite({ calls });
+
+	const handleSubmit = () => {
+		if (!isConnected && !address) {
+			toast.error("Please connect your wallet");
+			return;
+		}
+
+		if (!tba || amount == 0) {
+			toast.error("Please fill out all fields");
+			return;
+		}
+
+		try {
+			writeAsync();
+			toast.success("TBA Listed successfully");
+			setOpenListing(false);
+		} catch (error) {
+			console.error(error);
+			toast.error("Unable to list TBA ");
+		}
+	};
+
 	return (
 		<Layout>
 			<div className="bg-hero bg-no-repeat bg-cover my-10 rounded-xl border border-[#DCD4FF] lg:h-[592px] w-full  flex items-center gap-40 justify-between px-[120px]">
@@ -47,13 +102,13 @@ export default function Home() {
 				</h1>
 				<div className="py-10">
 					<div className="grid grid-cols-4 gap-5">
-						{Array(8)
-							.fill(0)
-							.map((_, i) => (
+						{listings?.slice(0, 8).map(
+							({ nft_contract_address, seller, token_id, amount, listing_id }, i) => (
 								<div key={i}>
-									<NFTCard route="/details" />
+									<NFTCard seller={seller} title={nft_contract_address} lisiting_id={listing_id} route="/details" amount={amount}  />
 								</div>
-							))}
+							)
+						)}
 					</div>
 				</div>
 				<button
@@ -100,13 +155,19 @@ export default function Home() {
 				onClose={() => setOpenListing(!openListing)}
 				title="List Tokenbound Account"
 			>
-				<div>
-		
+				<div className="space-y-3">
+					<Input
+						placeholder="TBA Address"
+						onChange={(e) => setTba(e.target.value)}
+					/>
 
-					<Input placeholder="TBA Address" />
+					<Input
+						placeholder="Amount"
+						onChange={(e) => setAmount(parseInt(e.target.value))}
+					/>
 
 					<button
-						onClick={() => setOpenListing(true)}
+						onClick={handleSubmit}
 						className="w-full border flex items-center justify-center gap-3 border-primary bg-primary rounded-lg py-3 text-[18px] font-bold text-white mt-5"
 					>
 						<PlaceBidWhiteIcon color="#fff" /> Submit

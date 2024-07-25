@@ -12,8 +12,7 @@ export const filters = [
     id: 'category',
     name: 'Category',
     options: [
-      { value: 'new-arrivals', label: 'All New Arrivals' },
-      { value: 'tees', label: 'Tees' },
+     
     
     ],
   },
@@ -21,8 +20,7 @@ export const filters = [
     id: 'price',
     name: 'Price',
     options: [
-      { value: 'xs', label: 'XS' },
-      { value: 's', label: 'S' },
+     
     ],
   },
 ]

@@ -1,14 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Layout from "@/components/Layout";
 import { PlaceBidIcon, PlaceBidWhiteIcon } from "@/assets/Icons";
 import CustomModal from "@/components/Modal";
 import { Input } from "@/components/Input";
+import { useParams } from "next/navigation";
+import { CONTRACT_ADDR } from "@/lib/utils";
+import {
+	useAccount,
+	useContractRead,
+	useContractWrite,
+} from "@starknet-react/core";
+import toast from "react-hot-toast";
+import { cairo, RpcProvider, Uint256 } from "starknet";
+import { ABI } from "@/lib/abi";
+import useBidsHooks from "@/components/hooks/useBidsHooks";
+import OrbitProgress from "react-loading-indicators/OrbitProgress";
 
 export default function Example() {
 	const [active, setActiveTab] = useState<number>(1);
 	const [bidOpen, setBidOpen] = useState<boolean>(false);
+	const { isConnected, address } = useAccount();
+	const [amount, setAmount] = useState<number>(0);
+	const params = useParams();
+
+	const { listingBids, bidsIsLoading } = useBidsHooks();
 
 	const tabs = [
 		{
@@ -21,6 +38,57 @@ export default function Example() {
 			label: "Bids",
 		},
 	];
+
+	const provider = new RpcProvider({
+		nodeUrl: "https://starknet-sepolia.public.blastapi.io",
+	});
+
+	const calls = useMemo(() => {
+		let formattedAmount: Uint256 = cairo.uint256(9);
+		let listing_id = params.listing_id;
+		console.log(formattedAmount, listing_id);
+
+		const tx = {
+			contractAddress: CONTRACT_ADDR,
+			entrypoint: "place_bid",
+			provider: provider,
+			calldata: [7, formattedAmount],
+		};
+		return [tx];
+	}, [params.listing_id, amount]);
+
+	const { writeAsync } = useContractWrite({ calls });
+
+	const handleSubmit = () => {
+		if (!isConnected && !address) {
+			toast.error("Please connect your wallet");
+			return;
+		}
+
+		if (amount == 0) {
+			toast.error("Please amount can not be zero");
+			return;
+		}
+
+		try {
+			writeAsync();
+			toast.success("Bid placed successfully");
+		} catch (error) {
+			console.error(error);
+			toast.error("Unable placed bid ");
+		}
+	};
+
+	const { data, isLoading } = useContractRead({
+		functionName: "get_listing",
+		args: [params.listing_id],
+		abi: ABI,
+		address: CONTRACT_ADDR,
+		watch: true,
+	});
+
+
+	console.log(data)
 
 	return (
 		<>
@@ -44,7 +112,7 @@ export default function Example() {
 											Current Owner
 										</p>
 										<p className="text-[18px] font-bold text-[#49536E] ">
-											Rarible
+										{data?.seller?.toString().slice(0, 8).concat("...").concat(data?.seller?.toString().slice(-10))}
 										</p>
 									</div>
 								</div>
@@ -63,13 +131,13 @@ export default function Example() {
 												Price
 											</p>
 											<p className="text-[18px] font-bold text-[#49536E] ">
-												9.56 ETH
+												{data?.amount.toString()} STRK
 											</p>
 										</div>
 									</div>
 
 									<p className="text-[18px] font-bold text-[#49536E] ">
-										$50,152.56
+										$0
 									</p>
 								</div>
 
@@ -91,8 +159,9 @@ export default function Example() {
 										/>
 									</div>
 
-									<p className="text-primaryText font-bold font-satoshi text-[20px] pt-4">
-										Chiko & Roko x R66
+									<p className="text-primaryText  font-satoshi text-[20px] pt-4">
+									<strong>TBA</strong>: {data?.nft_contract_address?.toString().slice(0, 8).concat("...").concat(data?.nft_contract_address?.toString().slice(-10))}
+
 									</p>
 
 									<div className="flex items-center cursor-pointer mt-5">
@@ -157,10 +226,20 @@ export default function Example() {
 													<col />
 												</colgroup>
 
-												<tbody>
-													{Array(4)
-														.fill(0)
-														.map((_, i) => (
+											
+													{bidsIsLoading ? (
+														<div className="h-[50vh] flex items-center justify-center">
+															<OrbitProgress
+																color="#4A23A4"
+																size="medium"
+																text=""
+																textColor=""
+															/>
+														</div>
+													) : (
+														listingBids != undefined &&
+														listingBids.map(({bid_id, bidder, amount}, i) => (
+															<tbody>
 															<tr key={i} className="border-b border-gray-100 ">
 																<td className=" py-5 pl-8 pr-0 gap-3 px- flex items-center text-right align-top tabular-nums text-gray-700 ">
 																	<div className="w-8 h-8">
@@ -170,21 +249,23 @@ export default function Example() {
 																			alt=""
 																		/>
 																	</div>
-																	<p>0x2c934.............fa3f2c2.....a180</p>
+																	<p>	{bidder?.slice(0, 8).concat("...").concat(bidder?.slice(-10))}</p>
 																</td>
 																<td className=" py-5 font-bold  pr-5 text-right align-top tabular-nums text-gray-700 sm:table-cell">
-																	19.56 STRK
+																	{amount} STRK
 																</td>
 															</tr>
-														))}
-												</tbody>
+															</tbody>
+														))
+													)}
+												
 											</table>
 										</div>
 									)
 								)}
 							</div>
 
-							<div className="lg:col-start-3">{/* Activity feed */}</div>
+							<div className="lg:col-start-3"></div>
 						</div>
 					</div>
 
@@ -203,14 +284,14 @@ export default function Example() {
 											alt=""
 										/>
 									</div>
-									<div className="space-y-2">
+									{/* <div className="space-y-2">
 										<p className="font-satoshi text-sm font-light text-[#A4A9B6]">
 											Current Owner
 										</p>
 										<p className="text-[16px] font-satoshi font-bold text-[#49536E] ">
-											Rarible
+										{data?.sender?.slice(0, 6).concat("...").concat(address?.slice(-5))}
 										</p>
-									</div>
+									</div> */}
 								</div>
 
 								<div className="space-y-2">
@@ -218,18 +299,18 @@ export default function Example() {
 										Price
 									</p>
 									<p className="text-[14px] font-bold text-[#192648] ">
-										9.56 STRK
+										{data?.amount.toString()} STRK
 									</p>
 								</div>
-
-							
-
 							</div>
 
-							<Input placeholder="Price" />
+							<Input
+								placeholder="Amount"
+								onChange={(e) => setAmount(parseInt(e.target.value))}
+							/>
 
 							<button
-								onClick={() => setBidOpen(true)}
+								onClick={handleSubmit}
 								className="w-full border flex items-center justify-center gap-3 border-primary bg-primary rounded-lg py-3 text-[18px] font-bold text-white mt-5"
 							>
 								<PlaceBidWhiteIcon color="#fff" /> Place Bid

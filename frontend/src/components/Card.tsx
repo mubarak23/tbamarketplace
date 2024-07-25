@@ -1,22 +1,29 @@
 import Link from "next/link";
 import React from "react";
 interface TBAProps {
-	route: string
+	route: string;
+	title: string;
+	amount?: number;
+	seller: string;
+	lisiting_id: number;
 }
-const TBACard = ({route}: TBAProps) => {
+
+const TBACard = ({ route, title, seller, amount, lisiting_id }: TBAProps) => {
 	return (
-		<Link href={route}>
+		<Link href={`${route}/${lisiting_id}`}>
 			<div className="flex flex-col p-[16px] bg-[#F9F8FF] border border-[#DCD4FF] rounded-xl">
 				<img src="/img-1.png" alt="nft" />
-				<p className="text-primaryText font-bold font-satoshi text-[20px] pt-4">
-					Chiko & Roko x R66
+				<p className="text-primaryText font-bold font-satoshi text-[16px] pt-4">
+				 TBA: 0x{title?.slice(0, 5).concat("...").concat(title?.slice(-5))}
 				</p>
 				<div className="bg-primary space-y-3 px-3 py-3 mt-5 border border-primary rounded-lg">
 					<p className="text-[#F9F8FF] font-satoshi font-normal">
-						<span>Price: </span>0.188 STRK
+						<span>Price: </span>
+						{amount} STRK
 					</p>
 					<p className="text-[#B2B7C2] font-satoshi font-normal">
-						<span>Highest Bid: </span>1.188 STRK
+						<span>Seller: </span>
+						0x{seller?.slice(0, 5).concat("...").concat(seller?.slice(-5))}
 					</p>
 				</div>
 			</div>
