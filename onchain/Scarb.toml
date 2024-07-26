@@ -9,6 +9,7 @@ edition = "2023_11"
 starknet = "2.6.3"
 token_bound_accounts = { git = "https://github.com/Starknet-Africa-Edu/TBA", tag = "v0.3.0" }
 openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.13.0" }
+alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
 
 [dev-dependencies]
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.25.0" }

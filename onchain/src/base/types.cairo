@@ -20,17 +20,21 @@ pub struct Bid {
 }
 
 #[derive(Drop, starknet::Event)]
-pub struct TBAListed {
+pub struct TBAEvent {
     pub listing_id: u256,
-    pub seller: ContractAddress,
-    pub nft_contract_address: ContractAddress,
-    pub amount: u256,
+    pub listing: Listing
 }
 
 #[derive(Drop, starknet::Event)]
-pub struct BidPlaced {
+pub struct BidEvent {
     pub bid_id: u256,
-    pub nft_address: ContractAddress,
-    pub bidder: ContractAddress,
-    pub amount: u256,
+    pub bid: Bid
+}
+
+#[derive(Drop, starknet::Event)]
+pub struct BidAccepted {
+    pub listing_id: u256,
+    pub listing: Listing,
+    pub bid_id: u256,
+    pub bid: Bid,
 }
