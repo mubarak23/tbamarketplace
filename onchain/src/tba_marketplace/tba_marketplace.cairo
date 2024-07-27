@@ -219,6 +219,19 @@ pub mod TBAMarketplace {
                 contract_address: token_contract_address
             };
 
+            let mut calldata = ArrayTrait::new();
+            caller.serialize(ref calldata);
+            buyer.serialize(ref calldata);
+            token_id.serialize(ref calldata);
+
+            let call = Call {
+                to: token_contract_address,
+                selector: selector!("transfer_from"),
+                calldata: ArrayTrait::span(@calldata)
+            };
+
+            account_dispatcher.__execute__(array![call]);
+
             token_contract_dispatcher.transfer_from(caller, buyer, token_id);
             strk_token_dispatcher.transfer_from(caller, buyer, amount);
 
