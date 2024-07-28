@@ -8,15 +8,36 @@ use token_bound_accounts::interfaces::IRegistry::{
 use token_bound_accounts::test_helper::erc721_helper::{
     IERC721Dispatcher, IERC721DispatcherTrait, ERC721
 };
+use tbamarketplace::test_helper::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 pub const USER_ONE: felt252 = 'Bob';
 pub const USER_TWO: felt252 = 'Alice';
+
+pub fn __setup__() -> (ContractAddress, ContractAddress, ContractAddress, ContractAddress) {
+    let tba_marketplace = deploy_tbamarketplace();
+    let tba_account = deploy_tba_account();
+    let erc20_contract = deploy_erc20();
+    let erc721_contract = deploy_erc721();
+
+    (tba_marketplace, tba_account, erc20_contract, erc721_contract)
+}
 
 pub fn deploy_registry() -> ContractAddress {
     let registry_contract = declare("Registry").unwrap();
     let (registry_contract_address, _) = registry_contract.deploy(@ArrayTrait::new()).unwrap();
 
     registry_contract_address
+}
+
+pub fn deploy_erc20() -> ContractAddress {
+    let contract = declare("ERC20").unwrap();
+    let mut constructor_calldata = array!['TBA Test Token', 'TTT', 18_u8.into()];
+    let (contract_address, _) = contract.deploy(@constructor_calldata).unwrap();
+    let dispatcher = IERC20Dispatcher { contract_address: contract_address };
+    dispatcher.mint(USER_ONE.try_into().unwrap(), 1000.try_into().unwrap());
+    dispatcher.mint(USER_ONE.try_into().unwrap(), 1000.try_into().unwrap());
+
+    contract_address
 }
 
 pub fn deploy_erc721() -> ContractAddress {
